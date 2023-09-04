@@ -1,0 +1,30 @@
+---
+  - name: Include OS-specific variables.
+    include_vars: "{{ ansible_os_family }}.yml"
+
+  - name: Include OS-specific tasks.
+    include_tasks: "{{ ansible_os_family }}.yml"
+
+  - block:
+    - name: Ensure directories to export exist.
+      file:
+        path: "{{ item.strip().split()[0] }}"
+        state: directory
+      with_items: "{{ nfs_exports }}"
+
+    - name: Ensure NFS Exports file is configured.
+      template:
+        src: exports.j2
+        dest: /etc/exports
+        owner: root
+        group: root
+        mode: 0644
+      notify: Reload NFS Exports.
+
+    - name: Ensure NFS is running.
+      service:
+        name: "{{ nfs_server_daemon }}"
+        state: started
+        enabled: yes
+
+    when: nfs_exports | length > 0
