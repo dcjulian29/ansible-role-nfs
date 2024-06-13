@@ -1,2 +1,2 @@
 ---
-  nfs_server_daemon: nfs-kernel-server
+nfs_server_daemon: nfs-kernel-server
